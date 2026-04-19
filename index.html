@@ -1,0 +1,169 @@
+﻿<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Runner Quest - 2D Canvas Oyun</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="livesHearts" class="lives-hearts" aria-live="polite" aria-label="Can"></div>
+
+    <div class="app-shell">
+      <header class="hud">
+        <div class="hud-item">
+          <span class="hud-label">Bolum</span>
+          <strong id="hudLevel">1</strong>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Altin</span>
+          <strong id="hudGold">0</strong>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Mesafe</span>
+          <strong id="hudDistance">0 m</strong>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Durum</span>
+          <strong id="hudBoost">Normal</strong>
+        </div>
+      </header>
+
+      <div id="shopPanel" class="shop-panel">
+        <div class="shop-header">
+          <span>Magaza</span>
+          <span id="totalGoldDisplay">Altin: 0</span>
+        </div>
+        <div class="shop-item">
+          <span>Hiz Iksiri (10 sn)</span>
+          <span class="price">30 Altin</span>
+          <button id="buySpeedPotion" type="button">Satın Al</button>
+        </div>
+        <div id="potionActiveDisplay" class="potion-active hidden">
+          <span>Hiz Iksiri Aktif</span>
+          <span id="potionTimer">10s</span>
+        </div>
+      </div>
+
+      <div id="bossHealthBar" class="boss-health-bar hidden">
+        <div class="boss-label">Boss</div>
+        <div class="boss-track">
+          <div class="boss-fill" id="bossFill"></div>
+        </div>
+        <div class="boss-text" id="bossText">0 / 0</div>
+      </div>
+
+      <main class="content">
+        <aside class="task-panel">
+          <h1>Gorev Takibi</h1>
+
+          <div class="task-card" id="taskGoldCard">
+            <div class="task-top">
+              <span>Altin (Bonus)</span>
+              <strong id="taskGoldText">0</strong>
+            </div>
+            <div class="task-track">
+              <div class="task-fill" id="taskGoldFill" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="task-card" id="taskDistanceCard">
+            <div class="task-top">
+              <span>Mesafe</span>
+              <strong id="taskDistanceText">0 / 0 m</strong>
+            </div>
+            <div class="task-track">
+              <div class="task-fill" id="taskDistanceFill"></div>
+            </div>
+          </div>
+
+          <p id="statusLine" class="status-line">Ilk bolum hazir. Oyunu baslatmak icin bolum secin.</p>
+          <div id="notificationStack" class="notification-stack" aria-live="polite"></div>
+        </aside>
+
+        <section class="play-panel">
+          <div class="canvas-frame">
+            <canvas id="gameCanvas" width="1600" height="900" aria-label="2D oyun alani"></canvas>
+
+            <div class="touch-controls">
+              <button id="moveLeftBtn" type="button">Sol</button>
+              <button id="moveRightBtn" type="button">Sag</button>
+              <button id="jumpBtn" type="button">Zipla</button>
+            </div>
+          </div>
+          <p class="controls-hint">Kontroller: <kbd>A</kbd> / <kbd>Left</kbd> ile sola git, <kbd>D</kbd> / <kbd>Right</kbd> ile saga git, <kbd>W</kbd> / <kbd>Up</kbd> / <kbd>Space</kbd> ile zipla, <kbd>E</kbd> ile saldir, <kbd>Q</kbd> ile tahta al/yerlestir.</p>
+        </section>
+      </main>
+
+      <section class="levels-panel">
+        <div class="levels-head">
+          <h2>Bolum Secimi</h2>
+          <p>Kilitli bolumler gorev tamamlanmadan acilamaz.</p>
+        </div>
+        <div id="levelGrid" class="level-grid"></div>
+      </section>
+    </div>
+
+    <div id="levelCompleteOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="overlayTitle">
+      <div class="overlay-card">
+        <h2 id="overlayTitle">Bolum Tamamlandi</h2>
+        <p id="overlaySummary"></p>
+        <div class="overlay-actions">
+          <button id="nextLevelBtn" type="button">Sonraki Bolum</button>
+          <button id="replayLevelBtn" type="button" class="ghost">Tekrar Oyna</button>
+          <button id="closeOverlayBtn" type="button" class="ghost">Bolum Secimi</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="gameOverOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+      <div class="overlay-card">
+        <h2 id="gameOverTitle">Oyun Bitti</h2>
+        <p id="gameOverMessage">Canin bitti.</p>
+        <div class="overlay-actions">
+          <button id="restartGameBtn" type="button">Yeniden Baslat</button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="finalStoryOverlay"
+      class="final-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="finalStoryTitle"
+      aria-describedby="finalStoryText"
+    >
+      <div class="final-card">
+        <p class="final-kicker">Zafer Hikayesi</p>
+        <h2 id="finalStoryTitle">Son Bolum Tamamlandi</h2>
+        <p id="finalStoryText" class="final-text"></p>
+        <div class="final-actions">
+          <button id="finalReplayBtn" type="button">Tekrar Oyna</button>
+          <button id="finalMenuBtn" type="button" class="ghost">Ana Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="storyIntroOverlay"
+      class="intro-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="storyIntroTitle"
+      aria-describedby="storyIntroText"
+    >
+      <div class="intro-card">
+        <p class="intro-kicker">Hikaye Baslangici</p>
+        <h2 id="storyIntroTitle">Turkiye'nin Son Kosucusu</h2>
+        <p id="storyIntroText" class="intro-text"></p>
+        <div class="intro-actions">
+          <p class="intro-hint"><kbd>Space</kbd> ile de gecilebilir</p>
+          <button id="storyContinueBtn" type="button" class="intro-continue-btn">Devam Et</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./game/main.js"></script>
+  </body>
+</html>
